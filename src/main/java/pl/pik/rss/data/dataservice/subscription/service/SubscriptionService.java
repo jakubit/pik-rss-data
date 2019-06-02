@@ -6,7 +6,7 @@ import pl.pik.rss.data.dataservice.subscription.model.Subscription;
 import pl.pik.rss.data.dataservice.subscription.repository.SubscriptionRepository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SubscriptionService {
@@ -17,12 +17,23 @@ public class SubscriptionService {
         this.subscriptionRepository = subscriptionRepository;
     }
 
-    public void subscribeToRssUrl(String rssUrl){
+    public void subscribeToRssUrl(String rssUrl) throws IllegalArgumentException {
+        if (rssUrl.isEmpty())
+            throw new IllegalArgumentException(rssUrl);
+
         Subscription subscription = new Subscription(rssUrl, LocalDateTime.now().minusYears(1));
         subscriptionRepository.save(subscription);
     }
 
     public Optional<Subscription> findSubscriptionByRssUrl(String rssUrl) {
+        if (rssUrl.isEmpty())
+            throw new IllegalArgumentException(rssUrl);
+
         return subscriptionRepository.findById(rssUrl);
+    }
+
+    public List<Subscription> getAllSubscriptions() {
+        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
+        return new LinkedList<>((Collection<? extends Subscription>) subscriptions);
     }
 }

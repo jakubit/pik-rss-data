@@ -1,16 +1,12 @@
 package pl.pik.rss.data.dataservice.subscription.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.pik.rss.data.dataservice.subscription.model.Subscription;
 import pl.pik.rss.data.dataservice.subscription.service.SubscriptionService;
-
-
-import java.time.LocalDateTime;
 import java.util.Optional;
-
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 public class SubscriptionRestController {
@@ -22,12 +18,27 @@ public class SubscriptionRestController {
     }
 
     @PostMapping("/subscribe")
-    public void subscribe(@RequestParam("rssUrl") String rssUrl) {
-        subscriptionService.subscribeToRssUrl(rssUrl);
+    public ResponseEntity<?> subscribe(@RequestParam("rssUrl") String rssUrl) {
+        try {
+            subscriptionService.subscribeToRssUrl(rssUrl);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    @GetMapping("/subscriptions")
+    public ResponseEntity<?> getAllSubscriptions() {
+        return new ResponseEntity<>(subscriptionService.getAllSubscriptions(), HttpStatus.OK);
     }
 
     @GetMapping("/subscription")
-    public Optional<Subscription> getSubscription(@RequestParam("rssUrl") String rssUrl) {
-        return subscriptionService.findSubscriptionByRssUrl(rssUrl);
+    public ResponseEntity<?> getSubscription(@RequestParam("rssUrl") String rssUrl) {
+        try {
+            Optional<Subscription> subscription = subscriptionService.findSubscriptionByRssUrl(rssUrl);
+            return new ResponseEntity<>(subscription, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 }
