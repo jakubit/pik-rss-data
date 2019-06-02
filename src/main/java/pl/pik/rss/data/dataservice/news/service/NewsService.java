@@ -1,19 +1,13 @@
 package pl.pik.rss.data.dataservice.news.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.DateOperators;
 import org.springframework.stereotype.Service;
-import pl.pik.rss.data.dataservice.news.model.Channel;
-import pl.pik.rss.data.dataservice.news.model.News;
 import pl.pik.rss.data.dataservice.news.model.Record;
 import pl.pik.rss.data.dataservice.news.repository.NewsRepository;
 
-import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 @Service
 public class NewsService {
@@ -25,21 +19,27 @@ public class NewsService {
         this.newsRepository = newsRepository;
     }
 
-    public List<Record> getNews(String channelUrl, String startDateString, String endDateString) {
+    public List<Record> getNewsFromChannelBetweenDates(String channelUrl, String startDateString, String endDateString) {
+        Long startDateLong;
+        Long endDateLong;
+
+        if (endDateString.isEmpty()) {
+            endDateLong = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        } else {
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
+            endDateLong = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+
         LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
-        LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
+        startDateLong = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        Long startDateLong = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        Long endDateLong = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-        List<Record> recordList = newsRepository.findRecordFromChannelBetweenDates(startDateLong, endDateLong, channelUrl);
+        List<Record> recordList = newsRepository.findRecordsFromChannelBetweenDates(startDateLong, endDateLong, channelUrl);
 
         return  recordList;
     }
 
-    public List<Record> getNewsTest(String channelUrl) {
-        List<Record> recordList = newsRepository.findTest(channelUrl);
-        return  recordList;
-        //return recordList.stream().map(Record::getNews).collect(Collectors.toList());
+    public List<Record> getNewestNewsFromChannel(String rssUrl, int quantity) {
+        List<Record> recordList = newsRepository.findNewestRecordsFromChannel(rssUrl, quantity);
+        return recordList;
     }
 }
