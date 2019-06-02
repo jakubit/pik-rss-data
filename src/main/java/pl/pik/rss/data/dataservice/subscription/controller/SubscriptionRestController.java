@@ -25,7 +25,7 @@ public class SubscriptionRestController {
 
     @RequestMapping(value = "/subscribe", params = "rssUrl", method = POST)
     public void subscribe(@RequestParam("rssUrl") String rssUrl) {
-        Subscription subscription = new Subscription(rssUrl, LocalDateTime.now().minusDays(1));
+        Subscription subscription = new Subscription(rssUrl, LocalDateTime.now().minusYears(1));
         subscriptionRepository.save(subscription);
     }
 
