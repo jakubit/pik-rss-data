@@ -1,9 +1,13 @@
 package pl.pik.rss.data.dataservice.news.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pl.pik.rss.data.dataservice.news.model.Record;
 import pl.pik.rss.data.dataservice.news.repository.NewsRepository;
+
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +43,8 @@ public class NewsService {
     }
 
     public List<Record> getNewestNewsFromChannel(String rssUrl, int quantity) {
-        List<Record> recordList = newsRepository.findNewestRecordsFromChannel(rssUrl, quantity);
-        return recordList;
+        PageRequest request =  PageRequest.of(0, quantity, new Sort(Sort.Direction.DESC, "rssItem.publishedDate"));
+        return newsRepository.findNewestRecordsFromChannel(rssUrl, request).getContent();
+
     }
 }

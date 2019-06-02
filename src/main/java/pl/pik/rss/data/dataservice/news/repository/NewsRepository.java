@@ -1,12 +1,14 @@
 package pl.pik.rss.data.dataservice.news.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
-import pl.pik.rss.data.dataservice.news.model.News;
+
 import pl.pik.rss.data.dataservice.news.model.Record;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+
+
 import java.util.List;
 
 public interface NewsRepository extends MongoRepository<Record, String> {
@@ -19,6 +21,6 @@ public interface NewsRepository extends MongoRepository<Record, String> {
             fields = "{ _id: 1 }")*/
 
     //$orderby: {dateTime: -1}
-    @Query("{'rssChannelInfo.link': ?0, $limit: ?1}")
-    List<Record> findNewestRecordsFromChannel(String rssUrl, int quantity);
+    @Query("{'rssChannelInfo.link': ?0}")
+    Page<Record> findNewestRecordsFromChannel(String rssUrl, PageRequest pageRequest);
 }
