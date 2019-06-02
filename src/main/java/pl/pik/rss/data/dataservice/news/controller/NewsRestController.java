@@ -21,7 +21,7 @@ public class NewsRestController {
         this.newsService = newsService;
     }
 
-    @GetMapping("/news")
+    @GetMapping("/news/range")
     public ResponseEntity<?> getNewsFromChannelBetweenDates(@RequestParam(name = "rssUrl") String rssUrl,
                                                             @RequestParam(name = "startDate") String startDateString,
                                                             @RequestParam(name = "endDate", required = false) String endDateString) {
@@ -33,7 +33,7 @@ public class NewsRestController {
         }
     }
 
-    @GetMapping("/newsy")
+    @GetMapping("/news/newest")
     public ResponseEntity<?> getNewsNewestNewsFromChannel(@RequestParam(name = "rssUrl") String rssUrl,
                                                            @RequestParam(name = "quantity") int quantity) {
         try {
