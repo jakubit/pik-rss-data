@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pl.pik.rss.data.dataservice.news.exception.InputException;
 import pl.pik.rss.data.dataservice.news.service.NewsService;
 
 
@@ -25,12 +26,20 @@ public class NewsRestController {
                                                             @RequestParam(name = "startDate") String startDateString,
                                                             @RequestParam(name = "endDate", required = false) String endDateString) {
 
-        return new ResponseEntity<>(newsService.getNewsFromChannelBetweenDates(rssUrl, startDateString, endDateString), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(newsService.getNewsFromChannelBetweenDates(rssUrl, startDateString, endDateString), HttpStatus.OK);
+        } catch (InputException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 
     @GetMapping("/newsy")
     public ResponseEntity<?> getNewsNewestNewsFromChannel(@RequestParam(name = "rssUrl") String rssUrl,
                                                            @RequestParam(name = "quantity") int quantity) {
-        return new ResponseEntity<>(newsService.getNewestNewsFromChannel(rssUrl, quantity), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(newsService.getNewestNewsFromChannel(rssUrl, quantity), HttpStatus.OK);
+        } catch (InputException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 }

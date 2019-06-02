@@ -1,16 +1,17 @@
 package pl.pik.rss.data.dataservice.news.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.pik.rss.data.dataservice.news.exception.InputException;
 import pl.pik.rss.data.dataservice.news.model.Record;
 import pl.pik.rss.data.dataservice.news.repository.NewsRepository;
 
-
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
@@ -23,28 +24,38 @@ public class NewsService {
         this.newsRepository = newsRepository;
     }
 
-    public List<Record> getNewsFromChannelBetweenDates(String channelUrl, String startDateString, String endDateString) {
+    public List<Record> getNewsFromChannelBetweenDates(String channelUrl, String startDateString, String endDateString) throws InputException {
         Long startDateLong;
         Long endDateLong;
 
-        if (endDateString.isEmpty()) {
+        if (endDateString.isEmpty())
             endDateLong = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        } else {
-            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
-            endDateLong = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        }
+        else
+            endDateLong = getLongValueOfDate(endDateString);
 
-        LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
-        startDateLong = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-        List<Record> recordList = newsRepository.findRecordsFromChannelBetweenDates(startDateLong, endDateLong, channelUrl);
-
-        return  recordList;
+        startDateLong = getLongValueOfDate(startDateString);
+        return newsRepository.findRecordsFromChannelBetweenDates(startDateLong, endDateLong, channelUrl);
     }
 
-    public List<Record> getNewestNewsFromChannel(String rssUrl, int quantity) {
-        PageRequest request =  PageRequest.of(0, quantity, new Sort(Sort.Direction.DESC, "rssItem.publishedDate"));
-        return newsRepository.findNewestRecordsFromChannel(rssUrl, request).getContent();
+    public List<Record> getNewestNewsFromChannel(String rssUrl, int quantity) throws InputException {
+        try {
+            PageRequest request = PageRequest.of(0, quantity, new Sort(Sort.Direction.DESC, "rssItem.publishedDate"));
+            return newsRepository.findNewestRecordsFromChannel(rssUrl, request).getContent();
+        }
+        catch (IllegalArgumentException e){
+            throw new InputException(e.getMessage());
+        }
 
+    }
+
+    private Long getLongValueOfDate(String date) throws InputException {
+        Long startDateLong;
+        try {
+            LocalDateTime startDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy/MM/dd/HH:mm:ss"));
+            startDateLong = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        } catch (DateTimeParseException e) {
+            throw new InputException(e.getMessage());
+        }
+        return startDateLong;
     }
 }
