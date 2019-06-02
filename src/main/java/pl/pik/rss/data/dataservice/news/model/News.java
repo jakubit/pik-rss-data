@@ -12,7 +12,7 @@ import java.util.Date;
 @ToString
 @Getter
 @AllArgsConstructor
-@Document(collection = "testcollection")
+@Document(collection = "news")
 public class News {
     private String title;
     private Long publishedDate;

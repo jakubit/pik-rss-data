@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 public class Subscription {
-
     @Id
     private String url;
     private LocalDateTime lastUpdate;

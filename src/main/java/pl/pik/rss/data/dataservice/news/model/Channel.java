@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Getter
 @ToString
-@Document(collection = "testcollection")
+@Document(collection = "news")
 public class Channel {
     private String link;
     private String description;
