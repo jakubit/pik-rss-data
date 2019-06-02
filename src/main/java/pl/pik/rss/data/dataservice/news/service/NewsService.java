@@ -28,7 +28,7 @@ public class NewsService {
         Long startDateLong;
         Long endDateLong;
 
-        if (endDateString.isEmpty())
+        if (endDateString == null || endDateString.isEmpty())
             endDateLong = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         else
             endDateLong = getLongValueOfDate(endDateString);
@@ -37,10 +37,14 @@ public class NewsService {
         return newsRepository.findRecordsFromChannelBetweenDates(startDateLong, endDateLong, channelUrl);
     }
 
-    public List<Record> getNewestNewsFromChannel(String rssUrl, int quantity) throws InputException {
+    public List<Record> getNewestNews(String rssUrl, int quantity) throws InputException {
         try {
             PageRequest request = PageRequest.of(0, quantity, new Sort(Sort.Direction.DESC, "rssItem.publishedDate"));
-            return newsRepository.findNewestRecordsFromChannel(rssUrl, request).getContent();
+
+            if (rssUrl == null || rssUrl.isEmpty())
+                return newsRepository.findNewestRecordsFromAllChannels(request).getContent();
+            else
+                return newsRepository.findNewestRecordsFromOneChannel(rssUrl, request).getContent();
         }
         catch (IllegalArgumentException e){
             throw new InputException(e.getMessage());

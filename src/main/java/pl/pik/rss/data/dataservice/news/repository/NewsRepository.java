@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import pl.pik.rss.data.dataservice.news.model.Record;
 
 
-
+import java.net.ContentHandler;
 import java.util.List;
 
 public interface NewsRepository extends MongoRepository<Record, String> {
@@ -22,5 +22,8 @@ public interface NewsRepository extends MongoRepository<Record, String> {
 
     //$orderby: {dateTime: -1}
     @Query("{'rssChannelInfo.link': ?0}")
-    Page<Record> findNewestRecordsFromChannel(String rssUrl, PageRequest pageRequest);
+    Page<Record> findNewestRecordsFromOneChannel(String rssUrl, PageRequest pageRequest);
+
+    @Query("{}")
+    Page<Record> findNewestRecordsFromAllChannels(PageRequest request);
 }
