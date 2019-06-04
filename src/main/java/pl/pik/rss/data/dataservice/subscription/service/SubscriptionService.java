@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.pik.rss.data.dataservice.subscription.model.Subscription;
 import pl.pik.rss.data.dataservice.subscription.repository.SubscriptionRepository;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -20,6 +22,12 @@ public class SubscriptionService {
     public void subscribeToRssUrl(String rssUrl) throws IllegalArgumentException {
         if (rssUrl.isEmpty())
             throw new IllegalArgumentException(rssUrl);
+
+        try {
+            URL channelUrl = new URL(rssUrl);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(rssUrl);
+        }
 
         Subscription subscription = new Subscription(rssUrl, LocalDateTime.now().minusYears(1));
         subscriptionRepository.save(subscription);
